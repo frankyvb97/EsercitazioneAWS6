@@ -10,7 +10,7 @@ Globals:
     Timeout: 3
 
 Resources:
-  HelloWorldFunction:
+  AddDBFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
@@ -18,9 +18,34 @@ Resources:
       Runtime: nodejs18.x
       Architectures:
       - x86_64
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
+  
+  ProductsDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions: 
+        - 
+          AttributeName: "PK"
+          AttributeType: "N"
+        - 
+          AttributeName: "SK"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - 
+          AttributeName: "PK"
+          KeyType: "HASH"
+        - 
+          AttributeName: "SK"
+          KeyType: "RANGE"
+      TableName: ProductsDB
+
+  SaveProductAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Name: SaveProductAPI
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: api.yml
