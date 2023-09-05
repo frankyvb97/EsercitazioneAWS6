@@ -38,3 +38,14 @@ Resources:
           AttributeName: "SK"
           KeyType: "RANGE"
       TableName: ProductsDB
+
+  SaveProductAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Name: SaveProductAPI
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: api.yml
