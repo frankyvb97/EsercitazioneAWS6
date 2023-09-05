@@ -5,11 +5,22 @@ const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
 export const lambdaHandler = async (event) => {
-    try {
-        console.log(docClient);
-        console.log(event);
-    } catch (err) {
-        console.log(err);
-        return err;
-    }
+    const command = new UpdateCommand({});
+
+    const response = await docClient.send(command);
+    console.log(response);
+    return response;
 };
+
+// Esempio di UpdateCommand
+// const command = new UpdateCommand({
+//     TableName: "Dogs",
+//     Key: {
+//         Breed: "Labrador",
+//     },
+//     UpdateExpression: "set Color = :color",
+//     ExpressionAttributeValues: {
+//         ":color": "black",
+//     },
+//     ReturnValues: "ALL_NEW",
+// });
