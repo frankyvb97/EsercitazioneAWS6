@@ -1,0 +1,55 @@
+#da rivedere
+
+openapi: 3.0.1
+info:
+  title: SaveProductAPI
+  version: 1.0
+x-amazon-apigateway-request-validators:
+  RequestModelPayload:
+    validateRequestParameters: true
+    validateRequestBody: true
+paths:
+  /messages:
+    post:
+      summary: Invoca una Lambda per salvare un Prodotto nel Database
+      responses:
+        '200':
+          description: Lambda invocata con successo
+        '404':
+          description: Non trovato
+        default: Errore generico
+      x-amazon-apigateway-request-validator: "RequestModelPayload"
+      requestBody: 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tableSchema'
+      x-amazon-apigateway-integration:
+        type: "aws"
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: 200
+        uri: 
+          Fn::Sub:
+            - "arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/" #${QueueName}"
+            #- QueueName: { 'Fn::GetAtt': [ MessageQueue, QueueName ] }
+        #credentials: { 'Fn::GetAtt': [SQSRole, Arn] }
+        passthroughBehavior: WHEN_NO_MATCH
+        requestParameters:
+          integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
+        requestTemplates:
+          application/json: Action=SendMessage&MessageBody=$util.escapeJavaScript($input.body).replaceAll('\\"','"').replaceAll('\\r','').replaceAll('\\n','')
+components:
+  schemas:
+    tableSchema:
+      type: object
+      required: 
+        - PK
+        - SK
+      properties:
+        PK:
+          type: number
+        SK:
+          type: string
