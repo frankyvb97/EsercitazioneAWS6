@@ -2,12 +2,12 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
+const documentClient = DynamoDBDocumentClient.from(client);
 
 export const lambdaHandler = async (event) => {
     const command = new UpdateCommand({});
 
-    const response = await docClient.send(command);
+    const response = await documentClient.send(command);
     console.log(response);
     return response;
 };
