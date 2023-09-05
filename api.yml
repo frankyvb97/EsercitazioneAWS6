@@ -24,7 +24,7 @@ paths:
         content:
           application/json:
             schema:
-              #$ref: '#/components/schemas/sendMessageSchema'
+              $ref: '#/components/schemas/tableSchema'
       x-amazon-apigateway-integration:
         type: "aws"
         httpMethod: POST
@@ -43,7 +43,7 @@ paths:
           application/json: Action=SendMessage&MessageBody=$util.escapeJavaScript($input.body).replaceAll('\\"','"').replaceAll('\\r','').replaceAll('\\n','')
 components:
   schemas:
-    sendMessageSchema:
+    tableSchema:
       type: object
       required: 
         - PK
