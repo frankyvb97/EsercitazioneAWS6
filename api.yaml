@@ -9,7 +9,7 @@ x-amazon-apigateway-request-validators:
     validateRequestParameters: true
     validateRequestBody: true
 paths:
-  /messages:
+  /addProduct:
     post:
       summary: Invoca una Lambda per salvare un Prodotto nel Database
       responses:

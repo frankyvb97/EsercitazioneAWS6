@@ -10,7 +10,7 @@ Globals:
     Timeout: 3
 
 Resources:
-  AddDBFunction:
+  UpdateItemDBFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
