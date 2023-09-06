@@ -5,7 +5,19 @@ const client = new DynamoDBClient({});
 const documentClient = DynamoDBDocumentClient.from(client);
 
 export const lambdaHandler = async (event) => {
-    const command = new UpdateCommand({});
+    const command = new UpdateCommand({
+        TableName: "ProductsDB",
+        Key: {
+            PK: "1",
+            SK: "ProductDetails",
+        },
+        UpdateExpression: "set Marca = :marca, Taglia = :taglia",
+        ExpressionAttributeValues: {
+            ":marca": "Asics",
+            ":taglia": "XL",
+        },
+        ReturnValues: "ALL_NEW",
+    });
 
     const response = await documentClient.send(command);
     console.log(response);
