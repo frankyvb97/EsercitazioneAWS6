@@ -10,10 +10,10 @@ export const lambdaHandler = async (event) => {
     const command = new UpdateCommand({
         TableName: "ProductsDB",
         Key: {
-            PK: "1",
-            SK: "ProductDetails",
+            PK: "1", //body.PK
+            SK: "ProductDetails", //body.SK
         },
-        UpdateExpression: "set Marca = :marca, Taglia = :taglia, Prezzo = :prezzo",
+        UpdateExpression: "set Marca = :marca, Taglia = :taglia, Prezzo = :prezzo", //body.attribute
         ExpressionAttributeValues: {
             ":marca": "Asics",
             ":taglia": "XL",
@@ -26,16 +26,3 @@ export const lambdaHandler = async (event) => {
     console.log(response);
     return response;
 };
-
-// Esempio di UpdateCommand
-// const command = new UpdateCommand({
-//     TableName: "Dogs",
-//     Key: {
-//         Breed: "Labrador",
-//     },
-//     UpdateExpression: "set Color = :color",
-//     ExpressionAttributeValues: {
-//         ":color": "black",
-//     },
-//     ReturnValues: "ALL_NEW",
-// });
