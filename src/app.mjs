@@ -35,7 +35,7 @@ async function addProduct(product) {
             ReturnValues: "ALL_NEW",
         });
         console.log(productRow);
-        const response = await documentClient.send(command);
+        const response = await documentClient.send(productRow);
         const status = addStatus(200, "OK");
         console.log(response);
         console.log(status);
