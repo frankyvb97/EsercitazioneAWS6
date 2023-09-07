@@ -7,13 +7,15 @@ const documentClient = DynamoDBDocumentClient.from(client);
 //export const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
 
 export const lambdaHandler = async (event) => {
+    let response;
     try {
-        const command = await addProduct(JSON.parse(event.body));
-        return command;
+        response = await addProduct(JSON.parse(event.body));
+        console.log(response);
+        return response;
     } catch (error) {
-        const status = addStatus(500, "Error 404");
-        console.log(status);
-        return status;
+        response = addStatus(404, "Error 404");
+        console.log(response);
+        return response;
     }
 };
 
@@ -41,12 +43,18 @@ async function addProduct(product) {
         console.log(status);
         return status;
     } catch (error) {
-        const status = addStatus(500, "Error 500");
-        console.log(status);
-        return status;
+        const response = addStatus(500, "Error 500");
+        console.log(response);
+        return response;
     }
 }
 
 function addStatus(number, status) {
-    return stat = [number, status];
+    return {
+        statusCode: number,
+        headers: {
+            'Content-Type': 'application/json,'
+        },
+        body: JSON.stringify(status)
+    }
 }

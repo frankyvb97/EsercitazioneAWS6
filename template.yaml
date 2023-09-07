@@ -18,6 +18,20 @@ Resources:
       Runtime: nodejs18.x
       Architectures:
       - x86_64
+      Events:
+        SendProductAPI:
+          Type: Api
+          Properties:
+            Path: /add
+            Method: post
+            RequestModel: !Ref SendProductModel
+            RestApiId: !Ref ServerlessRestApi
+      Environment:
+        Variables:
+          DYNAMOBD_TABLE: !Ref ProductsDB
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsDB
   
   ProductsDB:
     Type: 'AWS::DynamoDB::Table'
@@ -57,3 +71,12 @@ Resources:
           - PK
           - SK
       RestApiId: !Ref ServerlessRestApi
+
+# Esempio API:
+# {
+#     "PK": 1,
+#     "SK": "ProductDetails",
+#     "marca": "Adidas",
+#     "taglia": "XL",
+#     "prezzo":4.5
+# }
