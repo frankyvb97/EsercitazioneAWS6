@@ -7,33 +7,46 @@ const documentClient = DynamoDBDocumentClient.from(client);
 //export const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
 
 export const lambdaHandler = async (event) => {
-    const error = createStatus(200, "OK");
-    console.log(error);
-
-    const command = addProduct(event);
-    const response = await documentClient.send(command);
-    console.log(response);
-    return response;
+    try {
+        const command = await addProduct(JSON.parse(event.body));
+        return command;
+    } catch (error) {
+        const status = addStatus(500, "Error 404");
+        console.log(status);
+        return status;
+    }
 };
 
-function addProduct(product) {
-    const command = new UpdateCommand({
-        TableName: "ProductsDB",
-        Key: {
-            PK: product.PK, //body.PK
-            SK: product.SK, //body.SK
-        },
-        UpdateExpression: "set Marca = :marca, Taglia = :taglia, Prezzo = :prezzo", //body.attribute
-        ExpressionAttributeValues: {
-            ":marca": product.marca,
-            ":taglia": product.taglia,
-            ":prezzo": product.prezzo,
-        },
-        ReturnValues: "ALL_NEW",
-    });
-    return command;
+async function addProduct(product) {
+    let productRow;
+    try {
+        productRow = new UpdateCommand({
+            TableName: "ProductsDB",
+            Key: {
+                PK: product.PK,
+                SK: product.SK,
+            },
+            UpdateExpression: "set Marca = :marca, Taglia = :taglia, Prezzo = :prezzo",
+            ExpressionAttributeValues: {
+                ":marca": product.marca,
+                ":taglia": product.taglia,
+                ":prezzo": product.prezzo,
+            },
+            ReturnValues: "ALL_NEW",
+        });
+        console.log(productRow);
+        const response = await documentClient.send(productRow);
+        const status = addStatus(200, "OK");
+        console.log(response);
+        console.log(status);
+        return status;
+    } catch (error) {
+        const status = addStatus(500, "Error 500");
+        console.log(status);
+        return status;
+    }
 }
 
-function createStatus(number, status) {
-    return val = [number, status];
+function addStatus(number, status) {
+    return stat = [number, status];
 }
