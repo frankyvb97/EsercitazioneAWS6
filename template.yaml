@@ -11,7 +11,7 @@ Globals:
 
 Resources:
   UpdateItemDBFunction:
-    Type: AWS::Serverless::Function
+    Type: 'AWS::Serverless::Function'
     Properties:
       CodeUri: src/
       Handler: app.lambdaHandler
@@ -20,7 +20,7 @@ Resources:
       - x86_64
   
   ProductsDB:
-    Type: AWS::DynamoDB::Table
+    Type: 'AWS::DynamoDB::Table'
     Properties:
       AttributeDefinitions: 
         - 
@@ -39,13 +39,21 @@ Resources:
           KeyType: "RANGE"
       TableName: ProductsDB
 
-  SaveProductAPI:
-    Type: AWS::Serverless::Api
+  SendProductModel:
+    Type: 'AWS::ApiGateway::Model'
     Properties:
-      StageName: dev
-      Name: SaveProductAPI
-      DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: api.yml
+      Name: SendProductModel
+      ContentType: application/json
+      Schema:
+        title: SendProductModel
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        type: object
+        properties:
+          PK:
+            type: number
+          SK:
+            type: string
+        required:
+          - PK
+          - SK
+      RestApiId: !Ref ServerlessRestApi
