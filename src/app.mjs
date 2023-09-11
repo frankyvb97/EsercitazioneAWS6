@@ -7,12 +7,25 @@ const documentClient = DynamoDBDocumentClient.from(client);
 //export const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
 
 export const lambdaHandler = async (event) => {
+    let status;
     try {
         let response = await addProduct(JSON.parse(event.body));
-        const status = addStatus(response);
-        return status;
+        //gestire error type
+        status = response;
     } catch (error) {
-        const status = addStatus(404);
+        // console.log(error);
+        // console.log(error.name);
+        // console.log(error.message);
+        // console.log(error.stack);
+        if (error.name == 'Error') {
+            status = 400;
+        }
+        else {
+            status = 404;
+        }
+    } finally {
+        console.log(status);
+        status = addStatus(status);
         return status;
     }
 };
@@ -32,13 +45,11 @@ async function addProduct(product) {
         },
         ReturnValues: "ALL_NEW",
     }
-    try {
-        const newCommand = new UpdateCommand(params);
-        const response = await documentClient.send(newCommand);
-        return response.$metadata.httpStatusCode;
-    } catch (error) {
-        return 400;
-    }
+    const newCommand = new UpdateCommand(params);
+    console.log(await documentClient.send(newCommand));
+    const response = await documentClient.send(newCommand);
+    console.log(response);
+    return response.$metadata.httpStatusCode;
 }
 
 function addStatus(number) {
@@ -46,7 +57,6 @@ function addStatus(number) {
         statusCode: number,
         headers: {
             'Content-Type': 'application/json,'
-        },
-        body: "Error " + number
+        }
     }
 }
