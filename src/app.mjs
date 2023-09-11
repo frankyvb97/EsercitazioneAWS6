@@ -7,21 +7,13 @@ const documentClient = DynamoDBDocumentClient.from(client);
 //export const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
 
 export const lambdaHandler = async (event) => {
-    console.log(event);
-    console.log(event.body);
-    let response;
     try {
-        console.log("Avvio addProduct");
-        response = await addProduct(JSON.parse(event.body));
-        console.log(response);
-        const status = addStatus(response, "Error" + response);
-        console.log(status);
+        let response = await addProduct(JSON.parse(event.body));
+        const status = addStatus(response);
         return status;
     } catch (error) {
-        console.log("Errore addProduct");
-        response = addStatus(404, "Error 404");
-        //console.log(response);
-        return response;
+        const status = addStatus(404);
+        return status;
     }
 };
 
@@ -41,30 +33,20 @@ async function addProduct(product) {
         ReturnValues: "ALL_NEW",
     }
     try {
-        console.log(productRow);
-        console.log("Aggiunta riga");
-        const newCommand = UpdateCommand(productRow);
-        console.log("Prima fase aggiunta completata");
-        console.log(newCommand);
+        const newCommand = new UpdateCommand(productRow);
         const response = await documentClient.send(newCommand);
-        console.log("Seconda fase aggiunta completata");
-        const status = addStatus(200, "OK");
-        console.log(response);
-        //console.log(status);
-        return response;
+        return response.$metadata.httpStatusCode;
     } catch (error) {
-        const response = addStatus(500, "Error 500");
-        //console.log(response);
-        return response;
+        return 400;
     }
 }
 
-function addStatus(number, status) {
+function addStatus(number) {
     return {
         statusCode: number,
         headers: {
             'Content-Type': 'application/json,'
         },
-        body: JSON.stringify(status)
+        body: "Error " + number
     }
 }
