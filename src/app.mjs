@@ -7,25 +7,35 @@ const documentClient = DynamoDBDocumentClient.from(client);
 //export const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
 
 export const lambdaHandler = async (event) => {
-    let status;
-    try {
-        let response = await addProduct(JSON.parse(event.body));
-        //gestire error type
-        status = response;
-    } catch (error) {
-        // console.log(error);
-        // console.log(error.name);
-        // console.log(error.message);
-        // console.log(error.stack);
-        if (error.name == 'Error') {
-            status = 400;
-        }
-        else {
-            status = 404;
-        }
-    } finally {
+    if (!event.body) {
+        const status = addStatus(500);
         console.log(status);
-        status = addStatus(status);
+        return status;
+    }
+    let body = {};
+    try {
+        body = Array.of(JSON.parse(event.body));
+        //body = (JSON.parse(event.body));
+    } catch (error) {
+        console.log("Errore JSON non valido");
+    }
+    console.log(body)
+    let response = (body || []).map((record) => addProduct(record));
+    console.log(response)
+    let results = await Promise.allSettled(response);
+    console.log(results)
+    let batchItemFailures = results
+        .filter(item => item.status === 'rejected')
+        .map(item => ({ itemIdentifier: item.reason.message }))
+    console.log(batchItemFailures)
+    if (body && batchItemFailures.length === 0) {
+        const status = addStatus(200);
+        console.log(status);
+        return status;
+    }
+    else {
+        const status = addStatus(400);
+        console.log(status);
         return status;
     }
 };
@@ -46,10 +56,8 @@ async function addProduct(product) {
         ReturnValues: "ALL_NEW",
     }
     const newCommand = new UpdateCommand(params);
-    console.log(await documentClient.send(newCommand));
     const response = await documentClient.send(newCommand);
-    console.log(response);
-    return response.$metadata.httpStatusCode;
+    return response;
 }
 
 function addStatus(number) {
@@ -57,6 +65,7 @@ function addStatus(number) {
         statusCode: number,
         headers: {
             'Content-Type': 'application/json,'
-        }
+        },
+        body: number
     }
 }
