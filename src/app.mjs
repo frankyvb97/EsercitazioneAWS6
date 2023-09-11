@@ -4,57 +4,49 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 const client = new DynamoDBClient({ region: "eu-west-1" });
 const documentClient = DynamoDBDocumentClient.from(client);
 
-//export const docClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
+//export const documentClient = DynamoDBDocumentClient.from(new DynamoDBClient({region: "eu-west-1"}));
 
 export const lambdaHandler = async (event) => {
-    let response;
     try {
-        response = await addProduct(JSON.parse(event.body));
-        console.log(response);
-        return response;
+        let response = await addProduct(JSON.parse(event.body));
+        const status = addStatus(response);
+        return status;
     } catch (error) {
-        response = addStatus(404, "Error 404");
-        console.log(response);
-        return response;
+        const status = addStatus(404);
+        return status;
     }
 };
 
 async function addProduct(product) {
-    let productRow;
+    const productRow = {
+        TableName: "ProductsDB",
+        Key: {
+            PK: product.PK,
+            SK: product.SK,
+        },
+        UpdateExpression: "set Marca = :marca, Taglia = :taglia, Prezzo = :prezzo",
+        ExpressionAttributeValues: {
+            ":marca": product.marca,
+            ":taglia": product.taglia,
+            ":prezzo": product.prezzo,
+        },
+        ReturnValues: "ALL_NEW",
+    }
     try {
-        productRow = new UpdateCommand({
-            TableName: "ProductsDB",
-            Key: {
-                PK: product.PK,
-                SK: product.SK,
-            },
-            UpdateExpression: "set Marca = :marca, Taglia = :taglia, Prezzo = :prezzo",
-            ExpressionAttributeValues: {
-                ":marca": product.marca,
-                ":taglia": product.taglia,
-                ":prezzo": product.prezzo,
-            },
-            ReturnValues: "ALL_NEW",
-        });
-        console.log(productRow);
-        const response = await documentClient.send(productRow);
-        const status = addStatus(200, "OK");
-        console.log(response);
-        console.log(status);
-        return status;
+        const newCommand = new UpdateCommand(productRow);
+        const response = await documentClient.send(newCommand);
+        return response.$metadata.httpStatusCode;
     } catch (error) {
-        const response = addStatus(500, "Error 500");
-        console.log(response);
-        return response;
+        return 400;
     }
 }
 
-function addStatus(number, status) {
+function addStatus(number) {
     return {
         statusCode: number,
         headers: {
             'Content-Type': 'application/json,'
         },
-        body: JSON.stringify(status)
+        body: "Error " + number
     }
 }
