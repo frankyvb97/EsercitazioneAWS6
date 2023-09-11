@@ -18,7 +18,7 @@ export const lambdaHandler = async (event) => {
 };
 
 async function addProduct(product) {
-    const productRow = {
+    const params = {
         TableName: "ProductsDB",
         Key: {
             PK: product.PK,
@@ -33,7 +33,7 @@ async function addProduct(product) {
         ReturnValues: "ALL_NEW",
     }
     try {
-        const newCommand = new UpdateCommand(productRow);
+        const newCommand = new UpdateCommand(params);
         const response = await documentClient.send(newCommand);
         return response.$metadata.httpStatusCode;
     } catch (error) {
