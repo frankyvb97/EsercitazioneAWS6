@@ -15,7 +15,6 @@ export const lambdaHandler = async (event) => {
     let body = {};
     try {
         body = Array.of(JSON.parse(event.body));
-        //body = (JSON.parse(event.body));
     } catch (error) {
         console.log("Errore JSON non valido");
     }
@@ -24,9 +23,7 @@ export const lambdaHandler = async (event) => {
     console.log(response)
     let results = await Promise.allSettled(response);
     console.log(results)
-    let batchItemFailures = results
-        .filter(item => item.status === 'rejected')
-        .map(item => ({ itemIdentifier: item.reason.message }))
+    let batchItemFailures = results.filter(item => item.status === 'rejected')
     console.log(batchItemFailures)
     if (body && batchItemFailures.length === 0) {
         const status = addStatus(200);
